@@ -1,0 +1,27 @@
+openapi: 3.0.1
+info:
+  title: Customer Service API
+  version: 1.0.0
+paths:
+  /api/v1/customers:
+    get:
+      summary: Get all customers
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create customer
+      responses:
+        '201':
+          description: Created
+  /api/v1/customers/{id}:
+    get:
+      summary: Get customer by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200': { description: OK }
