@@ -7,7 +7,8 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://host.docker.internal:27017/db_customer
+      #Para docker: uri: mongodb://host.docker.internal:27017/db_customer
+      uri: mongodb://localhost:27017/db_customer
 
   cloud:
     config:

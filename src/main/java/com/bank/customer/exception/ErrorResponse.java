@@ -1,5 +1,6 @@
 package com.bank.customer.exception;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,6 +9,7 @@ import java.util.Map;
 
 @Data
 @Builder
+@Schema(description = "Respuesta de error estándar de la API")
 public class ErrorResponse {
     @Builder.Default
     private Instant timestamp = Instant.now();
