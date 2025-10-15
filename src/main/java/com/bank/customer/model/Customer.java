@@ -42,7 +42,7 @@ public class Customer {
 
     @NotBlank(message = "customerType is required")
     @Size(min = 3, max = 20, message = "customerType must be between 3 and 20 characters")
-    @Pattern(regexp = "PERSONAL|BUSINESS|CORPORATE", message = "customerType must be PERSONAL, BUSINESS or CORPORATE")
+    @Pattern(regexp = "PERSONAL|EMPRESARIAL", message = "customerType must be PERSONAL, EMPRESARIAL")
     private String customerType;
 
     private Instant createdAt;

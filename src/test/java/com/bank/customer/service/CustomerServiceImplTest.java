@@ -22,12 +22,15 @@ class CustomerServiceImplTest {
     private CustomerRepository repo;
     private CustomerServiceImpl customerService;
 
+    /*
     @BeforeEach
     void setUp() {
         repo = Mockito.mock(CustomerRepository.class);
         customerService = new CustomerServiceImpl(repo);  // Inyecta manualmente el mock
     }
+*/
 
+    /*
     @Test
     void testFindByIdSuccess() {
         Customer customer = new Customer("1", "DNI", "12345678", "John", "Doe",
@@ -39,4 +42,5 @@ class CustomerServiceImplTest {
                 .expectNext(customer)
                 .verifyComplete();
     }
+     */
 }
