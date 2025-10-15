@@ -1,0 +1,328 @@
+openapi: 3.0.3
+info:
+  title: Customer Service API
+  version: 1.0.0
+  description: API para gestionar clientes del banco
+  contact:
+    name: Giomar Limo
+  license:
+    name: Apache 2.0
+servers:
+  - url: http://localhost:8081/bank/v1
+tags:
+  - name: customer-api
+    description: Operations related to bank customers
+
+paths:
+  /customers:
+    get:
+      tags:
+        - customer-api
+      summary: Get all customers
+      operationId: getAll
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - customer-api
+      summary: Create customer
+      operationId: create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+        description: Customer data to create
+      responses:
+        '201':
+          description: Customer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /customers/{id}:
+    get:
+      tags:
+        - customer-api
+      summary: Get customer by ID
+      operationId: getById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Customer ID
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        '200':
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - customer-api
+      summary: Update customer
+      operationId: update
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Customer ID
+          example: "507f1f77bcf86cd799439011"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+        description: Customer data to update
+      responses:
+        '200':
+          description: Customer updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - customer-api
+      summary: Delete customer
+      operationId: delete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Customer ID
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        '204':
+          description: Customer deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /customers/by-document/{documentNumber}:
+    get:
+      tags:
+        - customer-api
+      summary: Get customer by document number
+      operationId: getByDocument
+      parameters:
+        - name: documentNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Document number
+          example: "12345678"
+      responses:
+        '200':
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    CustomerRequest:
+      type: object
+      required:
+        - documentType
+        - documentNumber
+        - firstName
+        - customerType
+      properties:
+        documentType:
+          type: string
+          description: Type of document (DNI, CEX, PASSPORT)
+          pattern: '^(DNI|CEX|PASSPORT)$'
+          example: DNI
+        documentNumber:
+          type: string
+          description: Document number
+          example: "12345678"
+          minLength: 3
+          maxLength: 20
+        firstName:
+          type: string
+          description: First name
+          example: Juan
+          minLength: 2
+          maxLength: 50
+        lastName:
+          type: string
+          description: Last name
+          example: Pérez
+          minLength: 2
+          maxLength: 50
+        email:
+          type: string
+          description: Email address
+          format: email
+          example: juan.perez@gmail.com
+          maxLength: 100
+        phone:
+          type: string
+          description: Phone number
+          example: "987654321"
+          minLength: 7
+          maxLength: 15
+        customerType:
+          type: string
+          description: Type of customer
+          pattern: '^(PERSONAL|BUSINESS|CORPORATE)$'
+          example: PERSONAL
+    CustomerResponse:
+      type: object
+      description: Customer response data
+      properties:
+        id:
+          type: string
+          description: Unique identifier
+          example: "507f1f77bcf86cd799439011"
+        documentType:
+          type: string
+          description: Type of document
+          example: DNI
+        documentNumber:
+          type: string
+          description: Document number
+          example: "12345678"
+        firstName:
+          type: string
+          description: First name
+          example: Juan
+        lastName:
+          type: string
+          description: Last name
+          example: Pérez
+        email:
+          type: string
+          description: Email address
+          example: juan.perez@gmail.com
+        phone:
+          type: string
+          description: Phone number
+          example: "987654321"
+        customerType:
+          type: string
+          description: Type of customer
+          example: PERSONAL
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2024-01-15T10:30:00Z"
+    ErrorResponse:
+      type: object
+      description: Standard API error response
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+          example: "2024-01-15T10:30:00Z"
+        status:
+          type: integer
+          description: HTTP status code
+          example: 400
+        error:
+          type: string
+          description: Error type
+          example: "Bad Request"
+        message:
+          type: string
+          description: Error message
+          example: "Error de validación en los campos"
+        path:
+          type: string
+          description: Request path
+          example: "/api/v1/customers"
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties:
+            type: string
+          example: {
+            "documentType": "must not be blank",
+            "firstName": "must not be blank"
+          }
+
+  responses:
+    BadRequest:
+      description: Bad Request - Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2024-01-15T10:30:00Z"
+            status: 400
+            error: "Bad Request"
+            message: "Error de validación en los campos"
+            path: "/api/v1/customers"
+            details:
+              documentType: "must not be blank"
+              firstName: "must not be blank"
+    NotFound:
+      description: Not Found - Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2024-01-15T10:30:00Z"
+            status: 404
+            error: "Not Found"
+            message: "Customer not found with id: 507f1f77bcf86cd799439011"
+            path: "/api/v1/customers/507f1f77bcf86cd799439011"
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2024-01-15T10:30:00Z"
+            status: 500
+            error: "Internal Server Error"
+            message: "An unexpected error occurred"
+            path: "/api/v1/customers"

@@ -10,7 +10,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
+import javax.validation.ConstraintViolationException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -41,13 +41,35 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.toMap(
                         fieldError -> fieldError.getField(),
                         fieldError -> fieldError.getDefaultMessage(),
-                        (msg1, msg2) -> msg1 // en caso de campos duplicados
+                        (msg1, msg2) -> msg1
                 ));
 
         ErrorResponse response = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message("Error de validación en los campos.")
+                .message("Validation error in request fields")
+                .path(exchange.getRequest().getPath().value())
+                .details(fieldErrors)
+                .build();
+
+        return Mono.just(ResponseEntity.badRequest().body(response));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public Mono<ResponseEntity<ErrorResponse>> handleConstraintViolation(ConstraintViolationException ex, ServerWebExchange exchange) {
+        log.warn("Constraint violation: {}", ex.getMessage());
+
+        Map<String, String> fieldErrors = ex.getConstraintViolations().stream()
+                .collect(Collectors.toMap(
+                        violation -> violation.getPropertyPath().toString(),
+                        violation -> violation.getMessage(),
+                        (msg1, msg2) -> msg1
+                ));
+
+        ErrorResponse response = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .message("Constraint violation in request")
                 .path(exchange.getRequest().getPath().value())
                 .details(fieldErrors)
                 .build();
@@ -62,7 +84,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message(ex.getMessage())
+                .message("An unexpected error occurred")
                 .path(exchange.getRequest().getPath().value())
                 .build();
 
