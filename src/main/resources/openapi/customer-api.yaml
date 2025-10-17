@@ -208,7 +208,7 @@ components:
         customerType:
           type: string
           description: Type of customer
-          pattern: '^(PERSONAL|BUSINESS|CORPORATE)$'
+          pattern: '^(PERSONAL|EMPRESARIAL)$'
           example: PERSONAL
     CustomerResponse:
       type: object
