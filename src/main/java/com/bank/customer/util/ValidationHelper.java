@@ -13,16 +13,16 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ValidationHelper {
 
-    private final Validator validator;
+  private final Validator validator;
 
-    public Mono<CustomerRequest> validateAsync(CustomerRequest request) {
-        return Mono.fromCallable(() -> {
-            BindingResult bindingResult = new BeanPropertyBindingResult(request, "customerRequest");
-            validator.validate(request, bindingResult);
-            if (bindingResult.hasErrors()) {
-                throw new WebExchangeBindException(null, bindingResult);
-            }
-            return request;
-        });
-    }
+  public Mono<CustomerRequest> validateAsync(CustomerRequest request) {
+    return Mono.fromCallable(() -> {
+      BindingResult bindingResult = new BeanPropertyBindingResult(request, "customerRequest");
+      validator.validate(request, bindingResult);
+      if (bindingResult.hasErrors()) {
+        throw new WebExchangeBindException(null, bindingResult);
+      }
+      return request;
+    });
+  }
 }

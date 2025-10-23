@@ -13,13 +13,13 @@ import java.time.ZoneOffset;
 @Mapper(componentModel = "spring")
 public interface CustomerMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    Customer toEntity(CustomerRequest dto);
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  Customer toEntity(CustomerRequest dto);
 
-    CustomerResponse toResponse(Customer entity);
+  CustomerResponse toResponse(Customer entity);
 
-    default OffsetDateTime map(Instant instant) {
-        return instant != null ? instant.atOffset(ZoneOffset.UTC) : null;
-    }
+  default OffsetDateTime map(Instant instant) {
+    return instant != null ? instant.atOffset(ZoneOffset.UTC) : null;
+  }
 }
