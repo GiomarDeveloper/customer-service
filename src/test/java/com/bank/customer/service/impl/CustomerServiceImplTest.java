@@ -10,6 +10,7 @@ import com.bank.customer.mapper.CustomerMapper;
 import com.bank.customer.model.Customer;
 import com.bank.customer.model.CustomerRequest;
 import com.bank.customer.model.CustomerResponse;
+import com.bank.customer.model.CustomerTypeEnum;
 import com.bank.customer.repository.CustomerRepository;
 import com.bank.customer.util.ValidationHelper;
 import java.time.Instant;
@@ -44,7 +45,7 @@ class CustomerServiceImplTest {
     CustomerRequest r = new CustomerRequest();
     r.setDocumentNumber("123");
     r.setFirstName("Giomar");
-    r.setCustomerType("PERSONAL");
+    r.setCustomerType(CustomerTypeEnum.PERSONAL);
     return r;
   }
 

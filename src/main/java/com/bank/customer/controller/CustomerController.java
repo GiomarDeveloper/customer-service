@@ -1,6 +1,7 @@
 package com.bank.customer.controller;
 
 import com.bank.customer.api.CustomersApi;
+import com.bank.customer.model.CustomerMonthlySummary;
 import com.bank.customer.model.CustomerRequest;
 import com.bank.customer.model.CustomerResponse;
 import com.bank.customer.service.CustomerService;
@@ -61,5 +62,15 @@ public class CustomerController implements CustomersApi {
       .flatMap(req -> service.update(id, req))
       .map(ResponseEntity::ok)
       .defaultIfEmpty(ResponseEntity.notFound().build());
+  }
+
+  @Override
+  public Mono<ResponseEntity<CustomerMonthlySummary>> getCustomerMonthlySummary(String customerId,
+                                                                                ServerWebExchange exchange) {
+    return service.generateMonthlySummary(customerId)
+      .map(ResponseEntity::ok)
+      .onErrorResume(ex -> {
+        return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+      });
   }
 }

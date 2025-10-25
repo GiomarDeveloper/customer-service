@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.bank.customer.model.Customer;
 import com.bank.customer.model.CustomerRequest;
+import com.bank.customer.model.CustomerTypeEnum;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class CustomerMapperTest {
     request.setDocumentNumber("12345678");
     request.setFirstName("Giomar");
     request.setLastName("Limo");
-    request.setCustomerType("PERSONAL");
+    request.setCustomerType(CustomerTypeEnum.PERSONAL);
 
     Customer entity = mapper.toEntity(request);
 

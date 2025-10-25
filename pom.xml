@@ -204,6 +204,7 @@
                                 <useLombokAnnotations>true</useLombokAnnotations>
                                 <title>CustomerApi</title>
                                 <modelBuilder>true</modelBuilder>
+                                <modelEnumsAsRef>true</modelEnumsAsRef>
                             </configOptions>
                             <output>${project.build.directory}/generated-sources/openapi</output>
                         </configuration>

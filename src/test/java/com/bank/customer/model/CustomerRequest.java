@@ -17,7 +17,7 @@ class CustomerRequestTest {
     req.setLastName("Limo");
     req.setEmail("giomar@test.com");
     req.setPhone("999999999");
-    req.setCustomerType("PERSONAL");
+    req.setCustomerType(CustomerTypeEnum.PERSONAL);
 
     assertEquals("DNI", req.getDocumentType());
     assertEquals("12345678", req.getDocumentNumber());
@@ -48,7 +48,7 @@ class CustomerRequestTest {
   @Test
   void testToStringAndConstructor() {
     CustomerRequest req = new CustomerRequest(
-      "DNI", "123", "Giomar", "PERSONAL"
+      "DNI", "123", "Giomar", CustomerTypeEnum.PERSONAL
     );
     assertNotNull(req.toString());
   }

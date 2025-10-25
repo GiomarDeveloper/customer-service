@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.bank.customer.model.CustomerRequest;
 import com.bank.customer.model.CustomerResponse;
+import com.bank.customer.model.CustomerTypeEnum;
 import com.bank.customer.service.CustomerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,14 +37,14 @@ class CustomerControllerTest {
     res.setId("1");
     res.setFirstName("Giomar");
     res.setLastName("Limo");
-    res.setCustomerType("PERSONAL");
+    res.setCustomerType(CustomerTypeEnum.PERSONAL);
     return res;
   }
 
   private CustomerRequest createRequest() {
     CustomerRequest req = new CustomerRequest();
     req.setFirstName("Giomar");
-    req.setCustomerType("PERSONAL");
+    req.setCustomerType(CustomerTypeEnum.PERSONAL);
     return req;
   }
 

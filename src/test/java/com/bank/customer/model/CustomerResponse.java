@@ -19,7 +19,7 @@ class CustomerResponseTest {
     res.setLastName("Limo");
     res.setEmail("giomar@test.com");
     res.setPhone("999999999");
-    res.setCustomerType("PERSONAL");
+    res.setCustomerType(CustomerTypeEnum.PERSONAL);
     res.setCreatedAt(OffsetDateTime.now());
 
     assertEquals("1", res.getId());
@@ -29,7 +29,7 @@ class CustomerResponseTest {
     assertEquals("Limo", res.getLastName());
     assertEquals("giomar@test.com", res.getEmail());
     assertEquals("999999999", res.getPhone());
-    assertEquals("PERSONAL", res.getCustomerType());
+    assertEquals(CustomerTypeEnum.PERSONAL, res.getCustomerType());
     assertNotNull(res.getCreatedAt());
     assertNotNull(res.toString());
   }

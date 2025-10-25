@@ -160,6 +160,32 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /customers/{customerId}/monthly-summary:
+    get:
+      tags:
+        - customer-api
+      summary: Get customer monthly summary with daily averages
+      operationId: getCustomerMonthlySummary
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Customer ID
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        '200':
+          description: Monthly summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerMonthlySummary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   schemas:
     CustomerRequest:
@@ -206,10 +232,7 @@ components:
           minLength: 7
           maxLength: 15
         customerType:
-          type: string
-          description: Type of customer
-          pattern: '^(PERSONAL|EMPRESARIAL)$'
-          example: PERSONAL
+          $ref: '#/components/schemas/CustomerTypeEnum'
     CustomerResponse:
       type: object
       description: Customer response data
@@ -243,9 +266,7 @@ components:
           description: Phone number
           example: "987654321"
         customerType:
-          type: string
-          description: Type of customer
-          example: PERSONAL
+          $ref: '#/components/schemas/CustomerTypeEnum'
         createdAt:
           type: string
           format: date-time
@@ -285,6 +306,96 @@ components:
             "documentType": "must not be blank",
             "firstName": "must not be blank"
           }
+    CustomerTypeEnum:
+      type: string
+      description: Tipo de customer
+      enum: [ PERSONAL, PERSONAL_VIP, EMPRESARIAL, EMPRESARIAL_PYME ]
+      example: PERSONAL
+    CustomerMonthlySummary:
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: Customer ID
+          example: "507f1f77bcf86cd799439011"
+        period:
+          type: string
+          description: Period of the summary (month and year)
+          example: "OCTUBRE 2024"
+        totalDailyAverage:
+          type: number
+          format: double
+          description: Total daily average across all products
+          example: 1616.67
+        accountSummaries:
+          type: array
+          description: Summary of accounts with daily averages
+          items:
+            $ref: '#/components/schemas/AccountSummary'
+        creditSummaries:
+          type: array
+          description: Summary of credits with daily averages
+          items:
+            $ref: '#/components/schemas/CreditSummary'
+        generatedAt:
+          type: string
+          format: date-time
+          description: When the summary was generated
+          example: "2024-10-24T10:30:00Z"
+    AccountSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Account ID
+          example: "68fbd02b242505325aa0bf80"
+        accountNumber:
+          type: string
+          description: Account number
+          example: "AHORRO123456789"
+        accountType:
+          $ref: '#/components/schemas/AccountTypeEnum'
+        currentBalance:
+          type: number
+          format: double
+          description: Current account balance
+          example: 11500.0
+        dailyAverage:
+          type: number
+          format: double
+          description: Daily average balance for the month
+          example: 416.67
+    CreditSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Credit ID
+          example: "68fcc4eb83e54584df65b316"
+        creditNumber:
+          type: string
+          description: Credit number
+          example: "CRD202400000001"
+        creditType:
+          $ref: '#/components/schemas/CreditTypeEnum'
+        currentBalance:
+          type: number
+          format: double
+          description: Current credit balance (negative for debts)
+          example: -2500.0
+        dailyAverage:
+          type: number
+          format: double
+          description: Daily average balance for the month
+          example: -1200.0
+    AccountTypeEnum:
+      type: string
+      enum: [AHORRO, CORRIENTE, PLAZO_FIJO]
+      example: AHORRO
+    CreditTypeEnum:
+      type: string
+      enum: [PRESTAMO_PERSONAL, PRESTAMO_EMPRESARIAL, TARJETA_CREDITO]
+      example: PRESTAMO_PERSONAL
 
   responses:
     BadRequest:

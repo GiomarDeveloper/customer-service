@@ -1,5 +1,6 @@
 package com.bank.customer.service;
 
+import com.bank.customer.model.CustomerMonthlySummary;
 import com.bank.customer.model.CustomerRequest;
 import com.bank.customer.model.CustomerResponse;
 import reactor.core.publisher.Flux;
@@ -12,4 +13,5 @@ public interface CustomerService {
   Mono<CustomerResponse> create(CustomerRequest request);
   Mono<CustomerResponse> update(String id, CustomerRequest request);
   Mono<Void> delete(String id);
+  Mono<CustomerMonthlySummary> generateMonthlySummary(String customerId);
 }
