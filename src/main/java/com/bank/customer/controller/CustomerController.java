@@ -1,9 +1,12 @@
 package com.bank.customer.controller;
 
 import com.bank.customer.api.CustomersApi;
+import com.bank.customer.model.ConsolidatedSummary;
 import com.bank.customer.model.CustomerMonthlySummary;
 import com.bank.customer.model.CustomerRequest;
 import com.bank.customer.model.CustomerResponse;
+import com.bank.customer.model.ProductReportRequest;
+import com.bank.customer.model.ProductReportResponse;
 import com.bank.customer.service.CustomerService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -72,5 +75,31 @@ public class CustomerController implements CustomersApi {
       .onErrorResume(ex -> {
         return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
       });
+  }
+
+  @Override
+  public Mono<ResponseEntity<ConsolidatedSummary>> getConsolidatedSummary(String customerId,
+                                                                          ServerWebExchange exchange) {
+    return service.getConsolidatedSummary(customerId)
+      .map(summary -> ResponseEntity.ok(summary))
+      .onErrorResume(ex -> {
+        // Manejo de errores
+        if (ex.getMessage().contains("not found")) {
+          return Mono.just(ResponseEntity.notFound().build());
+        }
+        return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+      });
+  }
+
+  @Override
+  public Mono<ResponseEntity<ProductReportResponse>> generateProductReport(
+    Mono<ProductReportRequest> productReportRequest, ServerWebExchange exchange) {
+    return productReportRequest
+      .flatMap(service::generateProductReport)
+      .map(ResponseEntity::ok)
+      .onErrorResume(ex -> {
+        return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+      });
+
   }
 }

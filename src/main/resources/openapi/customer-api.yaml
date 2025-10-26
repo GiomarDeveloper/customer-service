@@ -186,6 +186,53 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /customers/{customerId}/consolidated-summary:
+    get:
+      tags:
+        - customer-api
+      summary: Get complete consolidated summary of customer with all banking products
+      operationId: getConsolidatedSummary
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Customer ID
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        '200':
+          description: Consolidated summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsolidatedSummary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /customers/reports/products:
+    post:
+      tags:
+        - customer-api
+      summary: Generate comprehensive product report for time interval
+      operationId: generateProductReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductReportRequest'
+      responses:
+        '200':
+          description: Report generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductReportResponse'
+
+
 components:
   schemas:
     CustomerRequest:
@@ -396,6 +443,260 @@ components:
       type: string
       enum: [PRESTAMO_PERSONAL, PRESTAMO_EMPRESARIAL, TARJETA_CREDITO]
       example: PRESTAMO_PERSONAL
+    #Report General:
+    ConsolidatedSummary:
+      type: object
+      properties:
+        customer:
+          $ref: '#/components/schemas/CustomerResponse'
+        summaryDate:
+          type: string
+          format: date-time
+          description: Summary generation timestamp
+          example: "2024-10-24T10:30:00Z"
+        totalBalance:
+          type: number
+          format: double
+          description: Total net balance across all products
+          example: 15000.50
+        productsOverview:
+          $ref: '#/components/schemas/ProductsOverview'
+        accounts:
+          type: array
+          description: Customer's accounts with details
+          items:
+            $ref: '#/components/schemas/AccountDetail'
+        credits:
+          type: array
+          description: Customer's credits with details
+          items:
+            $ref: '#/components/schemas/CreditDetail'
+        recentTransactions:
+          type: array
+          description: Recent transactions across all products
+          items:
+            $ref: '#/components/schemas/TransactionDetail'
+    ProductsOverview:
+      type: object
+      properties:
+        totalAccounts:
+          type: integer
+          description: Total number of accounts
+          example: 3
+        totalCredits:
+          type: integer
+          description: Total number of credits
+          example: 2
+        totalTransactions:
+          type: integer
+          description: Total recent transactions
+          example: 15
+        activeAccounts:
+          type: integer
+          description: Number of active accounts
+          example: 3
+        activeCredits:
+          type: integer
+          description: Number of active credits
+          example: 2
+    AccountDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "68fbd02b242505325aa0bf80"
+        accountNumber:
+          type: string
+          example: "AHORRO123456789"
+        accountType:
+          $ref: '#/components/schemas/AccountTypeEnum'
+        currentBalance:
+          type: number
+          format: double
+          example: 11500.0
+        status:
+          type: string
+          example: "ACTIVE"
+        openedDate:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+    CreditDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "68fcc4eb83e54584df65b316"
+        creditNumber:
+          type: string
+          example: "CRD202400000001"
+        creditType:
+          $ref: '#/components/schemas/CreditTypeEnum'
+        currentBalance:
+          type: number
+          format: double
+          example: -2500.0
+        creditLimit:
+          type: number
+          format: double
+          example: 10000.0
+        availableCredit:
+          type: number
+          format: double
+          example: 7500.0
+        interestRate:
+          type: number
+          format: double
+          example: 12.5
+        status:
+          type: string
+          example: "ACTIVE"
+    TransactionDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "68fcc4eb83e54584df65b317"
+        transactionType:
+          type: string
+          example: "TRANSFER"
+        amount:
+          type: number
+          format: double
+          example: -500.0
+        description:
+          type: string
+          example: "Transfer to account 123456"
+        transactionDate:
+          type: string
+          format: date-time
+          example: "2024-10-24T09:15:00Z"
+        productType:
+          type: string
+          example: "ACCOUNT"
+        productNumber:
+          type: string
+          example: "AHORRO123456789"
+    #Report 04:
+    ProductReportRequest:
+      type: object
+      required:
+        - startDate
+        - endDate
+      properties:
+        startDate:
+          type: string
+          format: date
+          example: "2024-10-01"
+        endDate:
+          type: string
+          format: date
+          example: "2024-10-31"
+        reportType:
+          type: string
+          enum: [ DETAILED, SUMMARY, FINANCIAL ]
+          example: "SUMMARY"
+    ProductReportResponse:
+      type: object
+      properties:
+        period:
+          type: string
+          example: "01 Oct 2024 - 31 Oct 2024"
+        generatedAt:
+          type: string
+          format: date-time
+        summary:
+          $ref: '#/components/schemas/ReportSummary'
+        accountMetrics:
+          $ref: '#/components/schemas/AccountMetrics'
+        creditMetrics:
+          $ref: '#/components/schemas/CreditMetrics'
+        customerMetrics:
+          $ref: '#/components/schemas/CustomerMetrics'
+    ReportSummary:
+      type: object
+      properties:
+        totalCustomers:
+          type: integer
+          example: 150
+        activeCustomers:
+          type: integer
+          example: 142
+        totalAccounts:
+          type: integer
+          example: 300
+        totalCredits:
+          type: integer
+          example: 200
+        totalBalance:
+          type: number
+          format: double
+          example: 2500000.50
+        totalTransactions:
+          type: integer
+          example: 4850
+    AccountMetrics:
+      type: object
+      properties:
+        totalAccounts:
+          type: integer
+          example: 300
+        byType:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            AHORRO: 150
+            CORRIENTE: 120
+            PLAZO_FIJO: 30
+        averageBalance:
+          type: number
+          format: double
+          example: 8333.33
+        newAccounts:
+          type: integer
+          example: 15
+    CreditMetrics:
+      type: object
+      properties:
+        totalCredits:
+          type: integer
+          example: 200
+        byType:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            PRESTAMO_PERSONAL: 120
+            TARJETA_CREDITO: 80
+        totalOutstanding:
+          type: number
+          format: double
+          example: 1500000.00
+        averageInterestRate:
+          type: number
+          format: double
+          example: 18.5
+    CustomerMetrics:
+      type: object
+      properties:
+        totalCustomers:
+          type: integer
+          example: 150
+        byType:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            PERSONAL: 100
+            PERSONAL_VIP: 30
+            EMPRESARIAL: 15
+            EMPRESARIAL_PYME: 5
+        averageProductsPerCustomer:
+          type: number
+          format: double
+          example: 3.33
+
 
   responses:
     BadRequest:

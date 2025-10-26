@@ -1,6 +1,7 @@
 package com.bank.customer.client;
 
 import com.bank.customer.model.AccountSummary;
+import com.bank.customer.model.response.AccountResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,32 @@ public class AccountServiceClient {
       .bodyToFlux(new ParameterizedTypeReference<AccountSummary>() {})
       .doOnError(ex -> {
         log.error("Error fetching accounts for customer {}: {}", customerId, ex.getMessage());
+      })
+      .onErrorResume(ex -> Flux.empty());
+  }
+
+  public Flux<AccountResponse> getCustomerAccounts(String customerId) {
+    log.info("Getting accounts for customer: {}", customerId);
+
+    return webClient.get()
+      .uri(accountServiceUrl + "/accounts/customer/{customerId}", customerId)
+      .retrieve()
+      .bodyToFlux(new ParameterizedTypeReference<AccountResponse>() {})
+      .doOnError(ex -> {
+        log.error("Error fetching accounts for customer {}: {}", customerId, ex.getMessage());
+      })
+      .onErrorResume(ex -> Flux.empty());
+  }
+
+  public Flux<AccountResponse> getAllAccounts() {
+    log.info("Getting all accounts");
+
+    return webClient.get()
+      .uri(accountServiceUrl + "/accounts")
+      .retrieve()
+      .bodyToFlux(new ParameterizedTypeReference<AccountResponse>() {})
+      .doOnError(ex -> {
+        log.error("Error fetching all accounts: {}", ex.getMessage());
       })
       .onErrorResume(ex -> Flux.empty());
   }
