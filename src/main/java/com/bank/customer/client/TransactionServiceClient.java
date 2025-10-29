@@ -1,6 +1,8 @@
 package com.bank.customer.client;
 
 import com.bank.customer.model.response.TransactionResponse;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,9 +11,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
-import java.util.HashMap;
-import java.util.Map;
-
+/**
+ * Cliente para comunicación con el servicio de Transacciones.
+ * Maneja todas las llamadas API relacionadas con transacciones.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -22,6 +25,12 @@ public class TransactionServiceClient {
   @Value("${external.services.transaction.url:http://localhost:8084}")
   private String transactionServiceUrl;
 
+  /**
+   * Obtiene las transacciones recientes de un cliente.
+   *
+   * @param customerId el ID del cliente
+   * @return Flux de TransactionResponse
+   */
   public Flux<TransactionResponse> getRecentTransactions(String customerId) {
     log.info("Getting recent transactions for customer: {}", customerId);
 
@@ -38,6 +47,13 @@ public class TransactionServiceClient {
       .onErrorResume(ex -> Flux.empty());
   }
 
+  /**
+   * Obtiene transacciones dentro de un rango de fechas.
+   *
+   * @param startDate la fecha de inicio (formato: YYYY-MM-DD)
+   * @param endDate la fecha de fin (formato: YYYY-MM-DD)
+   * @return Flux de TransactionResponse
+   */
   public Flux<TransactionResponse> getTransactionsByDateRange(String startDate, String endDate) {
     log.info("Getting transactions from {} to {}", startDate, endDate);
 
@@ -52,7 +68,11 @@ public class TransactionServiceClient {
       .onErrorResume(ex -> Flux.empty());
   }
 
-  // O si necesitas también getAllTransactions
+  /**
+   * Obtiene todas las transacciones del sistema.
+   *
+   * @return Flux de TransactionResponse
+   */
   public Flux<TransactionResponse> getAllTransactions() {
     log.info("Getting all transactions");
 

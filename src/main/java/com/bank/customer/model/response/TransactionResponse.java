@@ -1,12 +1,15 @@
 package com.bank.customer.model.response;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
+/**
+ * DTO de respuesta para información de transacciones.
+ * Representa los datos de una transacción financiera.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

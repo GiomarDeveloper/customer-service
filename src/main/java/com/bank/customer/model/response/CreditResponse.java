@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO de respuesta para información de créditos.
+ * Representa los datos de un producto de crédito.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

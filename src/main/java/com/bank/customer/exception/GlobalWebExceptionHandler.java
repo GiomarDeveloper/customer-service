@@ -9,11 +9,22 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import reactor.core.publisher.Mono;
 
+/**
+ * Manejador global de excepciones para el contexto reactivo.
+ * Captura excepciones a nivel de WebFlux antes de que lleguen a los controladores.
+ */
 @Slf4j
 @Component
 @Order(-2) // se ejecuta antes que otros handlers
 public class GlobalWebExceptionHandler implements WebExceptionHandler {
 
+  /**
+   * Maneja excepciones en el contexto reactivo.
+   *
+   * @param exchange el intercambio del servidor web
+   * @param ex la excepción lanzada
+   * @return Mono vacío que indica el fin del procesamiento
+   */
   @Override
   public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
     log.error("Global reactive error: ", ex);

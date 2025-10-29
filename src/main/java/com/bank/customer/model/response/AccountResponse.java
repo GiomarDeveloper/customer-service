@@ -6,6 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO de respuesta para información de cuentas.
+ * Representa los datos de una cuenta bancaria.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,6 +32,9 @@ public class AccountResponse {
   private Integer freeTransactionLimit;
   private Double excessTransactionFee;
 
+  /**
+   * Representa un titular de cuenta.
+   */
   @Data
   @AllArgsConstructor
   @NoArgsConstructor
@@ -37,6 +44,9 @@ public class AccountResponse {
     private String relationship;
   }
 
+  /**
+   * Representa un firmante autorizado de cuenta.
+   */
   @Data
   @AllArgsConstructor
   @NoArgsConstructor

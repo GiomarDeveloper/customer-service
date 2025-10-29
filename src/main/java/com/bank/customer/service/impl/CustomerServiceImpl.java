@@ -31,6 +31,7 @@ import com.bank.customer.model.response.TransactionResponse;
 import com.bank.customer.repository.CustomerRepository;
 import com.bank.customer.service.CustomerService;
 import com.bank.customer.util.ValidationHelper;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -45,8 +46,10 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Instant;
-
+/**
+ * Implementación del servicio de gestión de clientes.
+ * Proporciona operaciones CRUD y business logic para clientes.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -59,6 +62,11 @@ public class CustomerServiceImpl implements CustomerService {
   private final CreditServiceClient creditServiceClient;
   private final TransactionServiceClient transactionServiceClient;
 
+  /**
+   * Obtiene todos los clientes del sistema.
+   *
+   * @return Flux de CustomerResponse con todos los clientes
+   */
   @Override
   public Flux<CustomerResponse> findAll() {
     return repo.findAll()
@@ -67,49 +75,81 @@ public class CustomerServiceImpl implements CustomerService {
       .doOnError(error -> log.error("Error retrieving customers: {}", error.getMessage(), error));
   }
 
+  /**
+   * Busca un cliente por su ID.
+   *
+   * @param id el ID del cliente
+   * @return Mono con el CustomerResponse encontrado
+   */
   @Override
   public Mono<CustomerResponse> findById(String id) {
     return repo.findById(id)
       .switchIfEmpty(Mono.error(new ResourceNotFoundException("Customer not found with id: " + id)))
       .map(mapper::toResponse)
       .doOnSuccess(response -> log.info("Retrieved customer successfully with id: {}", id))
-      .doOnError(error -> log.error("Error retrieving customer with id {}: {}", id, error.getMessage(), error));
+      .doOnError(error -> log.error(
+        "Error retrieving customer with id {}: {}", id, error.getMessage(), error));
   }
 
+  /**
+   * Busca un cliente por número de documento.
+   *
+   * @param documentNumber el número de documento del cliente
+   * @return Mono con el CustomerResponse encontrado
+   */
   @Override
   public Mono<CustomerResponse> findByDocumentNumber(String documentNumber) {
     return repo.findByDocumentNumber(documentNumber)
       .switchIfEmpty(Mono.error(new ResourceNotFoundException(
         "Customer not found with document number: " + documentNumber)))
       .map(mapper::toResponse)
-      .doOnSuccess(response -> log.info("Retrieved customer successfully with document: {}", documentNumber))
-      .doOnError(error -> log.error("Error retrieving customer with document {}: {}", documentNumber, error.getMessage(), error));
+      .doOnSuccess(response -> log.info(
+        "Retrieved customer successfully with document: {}", documentNumber))
+      .doOnError(error -> log.error(
+        "Error retrieving customer with document {}: {}",
+        documentNumber, error.getMessage(), error));
   }
 
+  /**
+   * Crea un nuevo cliente en el sistema.
+   *
+   * @param request los datos del cliente a crear
+   * @return Mono con el CustomerResponse creado
+   */
   @Override
   public Mono<CustomerResponse> create(CustomerRequest request) {
     return validationHelper.validateAsync(request)
       .map(mapper::toEntity)
       .flatMap(customer -> repo.findByDocumentNumber(customer.getDocumentNumber())
         .flatMap(existing -> Mono.<Customer>error(
-          new RuntimeException("Customer with document number already exists")))
+          new RuntimeException(
+            "Customer with document number already exists")))
         .switchIfEmpty(Mono.defer(() -> {
           customer.setCreatedAt(Instant.now());
           return repo.save(customer);
         }))
       )
       .map(mapper::toResponse)
-      .doOnSuccess(response -> log.info("Customer created successfully with id: {}", response.getId()))
-      .doOnError(error -> log.error("Error creating customer: {}", error.getMessage(), error));
+      .doOnSuccess(response -> log.info(
+        "Customer created successfully with id: {}", response.getId()))
+      .doOnError(error -> log.error(
+        "Error creating customer: {}", error.getMessage(), error));
   }
 
-
+  /**
+   * Actualiza un cliente existente.
+   *
+   * @param id el ID del cliente a actualizar
+   * @param request los nuevos datos del cliente
+   * @return Mono con el CustomerResponse actualizado
+   */
   @Override
   public Mono<CustomerResponse> update(String id, CustomerRequest request) {
     return validationHelper.validateAsync(request)
       .map(mapper::toEntity)
       .flatMap(customer -> repo.findById(id)
-        .switchIfEmpty(Mono.error(new ResourceNotFoundException("Customer not found with ID " + id)))
+        .switchIfEmpty(Mono.error(new ResourceNotFoundException(
+          "Customer not found with ID " + id)))
         .flatMap(existing -> {
           existing.setFirstName(customer.getFirstName());
           existing.setLastName(customer.getLastName());
@@ -120,19 +160,36 @@ public class CustomerServiceImpl implements CustomerService {
           return repo.save(existing);
         }))
       .map(mapper::toResponse)
-      .doOnSuccess(response -> log.info("Customer updated successfully with id: {}", id))
-      .doOnError(error -> log.error("Error updating customer with id {}: {}", id, error.getMessage(), error));
+      .doOnSuccess(response -> log.info(
+        "Customer updated successfully with id: {}", id))
+      .doOnError(error -> log.error(
+        "Error updating customer with id {}: {}", id, error.getMessage(), error));
   }
 
+  /**
+   * Elimina un cliente del sistema.
+   *
+   * @param id el ID del cliente a eliminar
+   * @return Mono vacío que indica completación
+   */
   @Override
   public Mono<Void> delete(String id) {
     return repo.findById(id)
-      .switchIfEmpty(Mono.error(new ResourceNotFoundException("Customer not found with ID " + id)))
+      .switchIfEmpty(Mono.error(new ResourceNotFoundException(
+        "Customer not found with ID " + id)))
       .flatMap(repo::delete)
-      .doOnSuccess(unused -> log.info("Customer deleted successfully with id: {}", id))
-      .doOnError(error -> log.error("Error deleting customer with id {}: {}", id, error.getMessage(), error));
+      .doOnSuccess(unused -> log.info(
+        "Customer deleted successfully with id: {}", id))
+      .doOnError(error -> log.error(
+        "Error deleting customer with id {}: {}", id, error.getMessage(), error));
   }
 
+  /**
+   * Genera un resumen mensual para un cliente.
+   *
+   * @param customerId el ID del cliente
+   * @return Mono con el resumen mensual del cliente
+   */
   @Override
   public Mono<CustomerMonthlySummary> generateMonthlySummary(String customerId) {
     log.info("Generating monthly summary for customer: {}", customerId);
@@ -160,24 +217,39 @@ public class CustomerServiceImpl implements CustomerService {
     });
   }
 
+  /**
+   * Obtiene un resumen consolidado de productos para un cliente.
+   *
+   * @param customerId el ID del cliente
+   * @return Mono con el resumen consolidado
+   */
   @Override
   public Mono<ConsolidatedSummary> getConsolidatedSummary(String customerId) {
     log.info("Generating consolidated summary for customer: {}", customerId);
 
     return repo.findById(customerId)
-      .switchIfEmpty(Mono.error(new RuntimeException("Customer not found with id: " + customerId)))
+      .switchIfEmpty(Mono.error(new RuntimeException(
+        "Customer not found with id: " + customerId)))
       .flatMap(customer ->
         Mono.zip(
           accountServiceClient.getCustomerAccounts(customerId).collectList(),
           creditServiceClient.getCustomerCredits(customerId).collectList(),
           transactionServiceClient.getRecentTransactions(customerId).collectList()
-        ).map(tuple -> buildConsolidatedSummary(customer, tuple.getT1(), tuple.getT2(), tuple.getT3()))
+        ).map(tuple -> buildConsolidatedSummary(
+          customer, tuple.getT1(), tuple.getT2(), tuple.getT3()))
       );
   }
 
+  /**
+   * Genera un reporte de productos para un período específico.
+   *
+   * @param request los parámetros del reporte (fechas, etc.)
+   * @return Mono con el reporte de productos generado
+   */
   @Override
   public Mono<ProductReportResponse> generateProductReport(ProductReportRequest request) {
-    log.info("Generating product report from {} to {}", request.getStartDate(), request.getEndDate());
+    log.info("Generating product report from {} to {}",
+        request.getStartDate(), request.getEndDate());
 
     String startDateStr = request.getStartDate().toString();
     String endDateStr = request.getEndDate().toString();
@@ -189,7 +261,8 @@ public class CustomerServiceImpl implements CustomerService {
       transactionServiceClient.getTransactionsByDateRange(
         startDateStr, endDateStr
       ).collectList()
-    ).map(tuple -> buildProductReport(request, tuple.getT1(), tuple.getT2(), tuple.getT3(), tuple.getT4()));
+    ).map(tuple -> buildProductReport(
+      request, tuple.getT1(), tuple.getT2(), tuple.getT3(), tuple.getT4()));
   }
 
   private ProductReportResponse buildProductReport(ProductReportRequest request,
@@ -217,8 +290,8 @@ public class CustomerServiceImpl implements CustomerService {
     long activeCustomers = customers.size();
 
     double totalBalance = accounts.stream()
-      .mapToDouble(AccountResponse::getBalance)
-      .sum();
+        .mapToDouble(AccountResponse::getBalance)
+        .sum();
 
     ReportSummary summary = new ReportSummary();
     summary.setTotalCustomers(customers.size());
@@ -233,12 +306,12 @@ public class CustomerServiceImpl implements CustomerService {
 
   private AccountMetrics buildAccountMetrics(List<AccountResponse> accounts) {
     Map<String, Long> accountsByTypeLong = accounts.stream()
-      .collect(Collectors.groupingBy(AccountResponse::getAccountType, Collectors.counting()));
+        .collect(Collectors.groupingBy(AccountResponse::getAccountType, Collectors.counting()));
 
     double averageBalance = accounts.stream()
-      .mapToDouble(AccountResponse::getBalance)
-      .average()
-      .orElse(0.0);
+        .mapToDouble(AccountResponse::getBalance)
+        .average()
+        .orElse(0.0);
 
     AccountMetrics metrics = new AccountMetrics();
     metrics.setTotalAccounts(accounts.size());
@@ -251,16 +324,16 @@ public class CustomerServiceImpl implements CustomerService {
 
   private CreditMetrics buildCreditMetrics(List<CreditResponse> credits) {
     Map<String, Long> creditsByTypeLong = credits.stream()
-      .collect(Collectors.groupingBy(CreditResponse::getCreditType, Collectors.counting()));
+        .collect(Collectors.groupingBy(CreditResponse::getCreditType, Collectors.counting()));
 
     double totalOutstanding = credits.stream()
-      .mapToDouble(CreditResponse::getOutstandingBalance)
-      .sum();
+        .mapToDouble(CreditResponse::getOutstandingBalance)
+        .sum();
 
     double averageInterestRate = credits.stream()
-      .mapToDouble(CreditResponse::getInterestRate)
-      .average()
-      .orElse(0.0);
+        .mapToDouble(CreditResponse::getInterestRate)
+        .average()
+        .orElse(0.0);
 
     CreditMetrics metrics = new CreditMetrics();
     metrics.setTotalCredits(credits.size());
@@ -276,22 +349,22 @@ public class CustomerServiceImpl implements CustomerService {
                                                List<CreditResponse> credits) {
 
     Map<String, Long> customersByTypeLong = customers.stream()
-      .collect(Collectors.groupingBy(Customer::getCustomerType, Collectors.counting()));
+        .collect(Collectors.groupingBy(Customer::getCustomerType, Collectors.counting()));
 
     // Calcular promedio de productos por cliente
     Map<String, Long> accountsPerCustomer = accounts.stream()
-      .collect(Collectors.groupingBy(AccountResponse::getCustomerId, Collectors.counting()));
+        .collect(Collectors.groupingBy(AccountResponse::getCustomerId, Collectors.counting()));
 
     Map<String, Long> creditsPerCustomer = credits.stream()
-      .collect(Collectors.groupingBy(CreditResponse::getCustomerId, Collectors.counting()));
+        .collect(Collectors.groupingBy(CreditResponse::getCustomerId, Collectors.counting()));
 
     double avgProducts = customers.stream()
-      .mapToDouble(customer ->
-        accountsPerCustomer.getOrDefault(customer.getId(), 0L) +
-          creditsPerCustomer.getOrDefault(customer.getId(), 0L)
-      )
-      .average()
-      .orElse(0.0);
+        .mapToDouble(customer ->
+          accountsPerCustomer.getOrDefault(customer.getId(), 0L)
+            + creditsPerCustomer.getOrDefault(customer.getId(), 0L)
+        )
+        .average()
+        .orElse(0.0);
 
     CustomerMetrics metrics = new CustomerMetrics();
     metrics.setTotalCustomers(customers.size());
@@ -314,21 +387,22 @@ public class CustomerServiceImpl implements CustomerService {
       ));
   }
 
-
-  private double calculateTotalDailyAverage(List<AccountSummary> accounts, List<CreditSummary> credits) {
+  private double calculateTotalDailyAverage(
+      List<AccountSummary> accounts, List<CreditSummary> credits) {
     double accountsSum = accounts.stream()
-      .mapToDouble(AccountSummary::getDailyAverage)
-      .sum();
+        .mapToDouble(AccountSummary::getDailyAverage)
+        .sum();
 
     double creditsSum = credits.stream()
-      .mapToDouble(CreditSummary::getDailyAverage)
-      .sum();
+        .mapToDouble(CreditSummary::getDailyAverage)
+        .sum();
 
     return accountsSum + creditsSum;
   }
 
   private String getCurrentPeriod() {
-    return LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("es", "ES"))).toUpperCase();
+    return LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+      "MMMM yyyy", new Locale("es", "ES"))).toUpperCase();
   }
 
   private ConsolidatedSummary buildConsolidatedSummary(Customer customer,
@@ -350,25 +424,25 @@ public class CustomerServiceImpl implements CustomerService {
     return consolidatedSummary;
   }
 
-
-  private Double calculateTotalBalance(List<AccountResponse> accounts, List<CreditResponse> credits) {
+  private Double calculateTotalBalance(List<AccountResponse> accounts,
+                                       List<CreditResponse> credits) {
     double accountBalance = accounts.stream()
-      .filter(account -> "ACTIVO".equals(account.getStatus()))
-      .mapToDouble(AccountResponse::getBalance)
-      .sum();
+        .filter(account -> "ACTIVO".equals(account.getStatus()))
+        .mapToDouble(AccountResponse::getBalance)
+        .sum();
 
     double creditBalance = credits.stream()
-      .filter(credit -> "ACTIVO".equals(credit.getStatus()))
-      .mapToDouble(credit -> {
-        // Para tarjetas de crédito, el availableCredit representa el saldo disponible
-        if ("TARJETA_CREDITO".equals(credit.getCreditType())) {
-          return credit.getCreditLimit() - credit.getAvailableCredit();
-        } else {
-          // Para préstamos, el outstandingBalance es la deuda
-          return -credit.getOutstandingBalance();
-        }
-      })
-      .sum();
+        .filter(credit -> "ACTIVO".equals(credit.getStatus()))
+        .mapToDouble(credit -> {
+          // Para tarjetas de crédito, el availableCredit representa el saldo disponible
+          if ("TARJETA_CREDITO".equals(credit.getCreditType())) {
+            return credit.getCreditLimit() - credit.getAvailableCredit();
+          } else {
+            // Para préstamos, el outstandingBalance es la deuda
+            return -credit.getOutstandingBalance();
+          }
+        })
+        .sum();
 
     return accountBalance + creditBalance;
   }
@@ -380,8 +454,10 @@ public class CustomerServiceImpl implements CustomerService {
     productsOverview.setTotalAccounts(accounts.size());
     productsOverview.setTotalCredits(credits.size());
     productsOverview.setTotalTransactions(transactions.size());
-    productsOverview.setActiveAccounts((int) accounts.stream().filter(acc -> "ACTIVO".equals(acc.getStatus())).count());
-    productsOverview.setActiveCredits((int) credits.stream().filter(cred -> "ACTIVO".equals(cred.getStatus())).count());
+    productsOverview.setActiveAccounts((int) accounts.stream().filter(
+        acc -> "ACTIVO".equals(acc.getStatus())).count());
+    productsOverview.setActiveCredits((int) credits.stream().filter(
+        cred -> "ACTIVO".equals(cred.getStatus())).count());
 
     return productsOverview;
   }
@@ -418,16 +494,14 @@ public class CustomerServiceImpl implements CustomerService {
     creditDetail.setId(credit.getId());
     creditDetail.setCreditNumber(credit.getCreditNumber());
     creditDetail.setCreditType(CreditTypeEnum.valueOf(credit.getCreditType()));
-    creditDetail.setCurrentBalance("TARJETA_CREDITO".equals(credit.getCreditType()) ?
-      credit.getCreditLimit() - credit.getAvailableCredit() :
-      -credit.getOutstandingBalance());
+    creditDetail.setCurrentBalance(
+        "TARJETA_CREDITO".equals(credit.getCreditType())
+          ? credit.getCreditLimit() - credit.getAvailableCredit() :
+          -credit.getOutstandingBalance());
     creditDetail.setCreditLimit(credit.getCreditLimit());
     creditDetail.setAvailableCredit(credit.getAvailableCredit());
     creditDetail.setInterestRate(credit.getInterestRate());
     creditDetail.setStatus(credit.getStatus());
-
-    // SOLO estos campos están definidos en el schema
-    // Los demás campos (totalAmount, outstandingBalance, monthlyPayment, etc.) NO existen en CreditDetail
 
     return creditDetail;
   }

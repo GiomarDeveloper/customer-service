@@ -18,6 +18,10 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ * Controlador principal para operaciones de clientes.
+ * Implementa la API generada por OpenAPI para el manejo de clientes.
+ */
 @RestController
 @RequiredArgsConstructor
 public class CustomerController implements CustomersApi {
@@ -68,8 +72,8 @@ public class CustomerController implements CustomersApi {
   }
 
   @Override
-  public Mono<ResponseEntity<CustomerMonthlySummary>> getCustomerMonthlySummary(String customerId,
-                                                                                ServerWebExchange exchange) {
+  public Mono<ResponseEntity<CustomerMonthlySummary>> getCustomerMonthlySummary(
+      String customerId, ServerWebExchange exchange) {
     return service.generateMonthlySummary(customerId)
       .map(ResponseEntity::ok)
       .onErrorResume(ex -> {
@@ -78,8 +82,8 @@ public class CustomerController implements CustomersApi {
   }
 
   @Override
-  public Mono<ResponseEntity<ConsolidatedSummary>> getConsolidatedSummary(String customerId,
-                                                                          ServerWebExchange exchange) {
+  public Mono<ResponseEntity<ConsolidatedSummary>> getConsolidatedSummary(
+      String customerId, ServerWebExchange exchange) {
     return service.getConsolidatedSummary(customerId)
       .map(summary -> ResponseEntity.ok(summary))
       .onErrorResume(ex -> {
@@ -93,7 +97,7 @@ public class CustomerController implements CustomersApi {
 
   @Override
   public Mono<ResponseEntity<ProductReportResponse>> generateProductReport(
-    Mono<ProductReportRequest> productReportRequest, ServerWebExchange exchange) {
+      Mono<ProductReportRequest> productReportRequest, ServerWebExchange exchange) {
     return productReportRequest
       .flatMap(service::generateProductReport)
       .map(ResponseEntity::ok)

@@ -8,6 +8,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Modelo estándar para respuestas de error en la API.
+ * Proporciona una estructura consistente para manejar errores.
+ */
 @Data
 @Builder
 @Schema(description = "Respuesta de error estándar de la API")

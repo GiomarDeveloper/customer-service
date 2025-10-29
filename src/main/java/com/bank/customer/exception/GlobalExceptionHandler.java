@@ -13,11 +13,22 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+/**
+ * Manejador global de excepciones para el microservicio de clientes.
+ * Captura y procesa todas las excepciones no manejadas en los controladores.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
   private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+  /**
+   * Maneja excepciones cuando no se encuentra un recurso.
+   *
+   * @param ex la excepción de recurso no encontrado
+   * @param exchange el intercambio del servidor web
+   * @return respuesta de error con estado 404
+   */
   @ExceptionHandler(ResourceNotFoundException.class)
   public Mono<ResponseEntity<ErrorResponse>> handleNotFound(ResourceNotFoundException ex,
                                                             ServerWebExchange exchange) {
@@ -33,6 +44,13 @@ public class GlobalExceptionHandler {
     return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(response));
   }
 
+  /**
+   * Maneja excepciones de validación de datos de entrada.
+   *
+   * @param ex la excepción de validación
+   * @param exchange el intercambio del servidor web
+   * @return respuesta de error con estado 400
+   */
   @ExceptionHandler(WebExchangeBindException.class)
   public Mono<ResponseEntity<ErrorResponse>> handleValidationException(WebExchangeBindException ex,
                                                                        ServerWebExchange exchange) {
@@ -56,9 +74,16 @@ public class GlobalExceptionHandler {
     return Mono.just(ResponseEntity.badRequest().body(response));
   }
 
+  /**
+   * Maneja violaciones de constraints de validación.
+   *
+   * @param ex la excepción de violación de constraint
+   * @param exchange el intercambio del servidor web
+   * @return respuesta de error con estado 400
+   */
   @ExceptionHandler(ConstraintViolationException.class)
   public Mono<ResponseEntity<ErrorResponse>> handleConstraintViolation(
-    ConstraintViolationException ex, ServerWebExchange exchange) {
+      ConstraintViolationException ex, ServerWebExchange exchange) {
     log.warn("Constraint violation: {}", ex.getMessage());
 
     Map<String, String> fieldErrors = ex.getConstraintViolations().stream()
@@ -79,6 +104,13 @@ public class GlobalExceptionHandler {
     return Mono.just(ResponseEntity.badRequest().body(response));
   }
 
+  /**
+   * Maneja excepciones generales no capturadas por otros manejadores.
+   *
+   * @param ex la excepción general
+   * @param exchange el intercambio del servidor web
+   * @return respuesta de error con estado 500
+   */
   @ExceptionHandler(Exception.class)
   public Mono<ResponseEntity<ErrorResponse>> handleGeneralError(Exception ex,
                                                                 ServerWebExchange exchange) {

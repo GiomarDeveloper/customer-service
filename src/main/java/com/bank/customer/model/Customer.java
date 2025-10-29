@@ -1,5 +1,10 @@
 package com.bank.customer.model;
 
+import java.time.Instant;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,9 +12,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.validation.constraints.*;
-import java.time.Instant;
-
+/**
+ * Entidad que representa un cliente en el sistema.
+ * Almacena la información personal y de identificación del cliente.
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -40,7 +46,8 @@ public class Customer {
   private String email;
 
   @Size(min = 7, max = 15, message = "phone must be between 7 and 15 characters")
-  @Pattern(regexp = "^[0-9+\\-\\s()]*$", message = "phone must contain only numbers, spaces, and valid characters")
+  @Pattern(regexp = "^[0-9+\\-\\s()]*$", message = "phone must contain only numbers, "
+    + "spaces, and valid characters")
   private String phone;
 
   @NotBlank(message = "customerType is required")
